@@ -79,12 +79,14 @@ export function useSpeechRecognition(options?: SpeechRecognitionOptions) {
           
           if (wantsCallbackRef.current) {
             wantsCallbackRef.current = false
-            const finalText = finalTranscriptRef.current
             
             // Add a short delay (150ms) to ensure no final onresult event is in flight
             setTimeout(() => {
               if (optionsRef.current?.onEnd) {
-                optionsRef.current.onEnd(finalText)
+                const final = finalTranscriptRef.current.trim()
+                const interim = interimTranscriptRef.current.trim()
+                const text = final && interim ? `${final} ${interim}` : (final || interim)
+                optionsRef.current.onEnd(text)
               }
             }, 150)
           }

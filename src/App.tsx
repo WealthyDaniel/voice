@@ -128,15 +128,13 @@ function App() {
       setEditText('')
       
       try {
-        // Request microphone permission first to ensure it's granted
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        // Stop temporary stream tracks
-        stream.getTracks().forEach((track) => track.stop())
-        
-        speech.start()
+        // Start the audio recorder first (which prompts for mic permission and gets the active stream)
         await recorder.startRecording()
+        
+        // Once the audio recording stream is active and running, start Speech Recognition
+        speech.start()
       } catch (err) {
-        console.error('Microphone permission denied:', err)
+        console.error('Microphone permission denied or failed to start:', err)
         alert('Microphone permission is required to record journal entries.')
       }
     }

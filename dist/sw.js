@@ -3,7 +3,7 @@ const CACHE_NAME = 'voice-journal-cache-v1'
 const PRECACHE_ASSETS = [
   "/",
   "/assets/index-B2uC0jdJ.css",
-  "/assets/index-CWOZBO6D.js",
+  "/assets/index-DIwMmcZG.js",
   "/favicon.svg",
   "/icon-192.png",
   "/icon-512.png",
