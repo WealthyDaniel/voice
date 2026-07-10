@@ -4,9 +4,10 @@ import { EntryItem } from './EntryItem'
 interface EntryListProps {
   entries: JournalEntry[]
   onDelete: (id: string) => void
+  onUpdate?: () => void
 }
 
-export function EntryList({ entries, onDelete }: EntryListProps) {
+export function EntryList({ entries, onDelete, onUpdate }: EntryListProps) {
   if (entries.length === 0) return null
 
   return (
@@ -17,7 +18,7 @@ export function EntryList({ entries, onDelete }: EntryListProps) {
       <ul className="flex flex-col gap-4">
         {entries.map((entry) => (
           <li key={entry.id}>
-            <EntryItem entry={entry} onDelete={onDelete} />
+            <EntryItem entry={entry} onDelete={onDelete} onUpdate={onUpdate} />
           </li>
         ))}
       </ul>

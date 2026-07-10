@@ -18,16 +18,23 @@ export function saveEntries(entries: JournalEntry[]): void {
   localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries))
 }
 
-export function addEntry(text: string): JournalEntry {
+export function addEntry(text: string, duration?: number): JournalEntry {
   const entry: JournalEntry = {
     id: crypto.randomUUID(),
     text: text.trim(),
     createdAt: new Date().toISOString(),
     wordCount: text.trim().split(/\s+/).filter(Boolean).length,
+    duration,
+    isStarred: false,
   }
   const entries = [entry, ...loadEntries()]
   saveEntries(entries)
   return entry
+}
+
+export function updateEntry(updated: JournalEntry): void {
+  const entries = loadEntries().map((e) => (e.id === updated.id ? updated : e))
+  saveEntries(entries)
 }
 
 export function deleteEntry(id: string): void {

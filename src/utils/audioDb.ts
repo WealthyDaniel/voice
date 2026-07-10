@@ -48,3 +48,27 @@ export async function deleteAudioBlob(id: string): Promise<void> {
     request.onerror = () => reject(request.error)
   })
 }
+
+export async function getAudioStorageStats(): Promise<{ count: number; size: number }> {
+  const db = await initAudioDb()
+  return new Promise((resolve) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly')
+    const store = transaction.objectStore(STORE_NAME)
+    const request = store.openCursor()
+    let count = 0
+    let size = 0
+    request.onsuccess = (e) => {
+      const cursor = (e.target as any).result
+      if (cursor) {
+        count++
+        if (cursor.value instanceof Blob) {
+          size += cursor.value.size
+        }
+        cursor.continue()
+      } else {
+        resolve({ count, size })
+      }
+    }
+    request.onerror = () => resolve({ count: 0, size: 0 })
+  })
+}

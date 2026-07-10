@@ -3,6 +3,8 @@ export interface JournalEntry {
   text: string
   createdAt: string
   wordCount: number
+  duration?: number
+  isStarred?: boolean
 }
 
 export type AppMode = 'idle' | 'recording' | 'editing'
