@@ -25,17 +25,19 @@ export function useSpeechRecognition() {
     recognition.lang = 'en-US'
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interim = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      let finalStr = ''
+      let interimStr = ''
+      for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i]
         if (result.isFinal) {
-          finalTranscriptRef.current += result[0].transcript
+          finalStr += result[0].transcript
         } else {
-          interim += result[0].transcript
+          interimStr += result[0].transcript
         }
       }
-      setTranscript(finalTranscriptRef.current)
-      setInterimTranscript(interim)
+      finalTranscriptRef.current = finalStr
+      setTranscript(finalStr)
+      setInterimTranscript(interimStr)
     }
 
     recognition.onend = () => {
@@ -92,7 +94,7 @@ export function useSpeechRecognition() {
     setInterimTranscript('')
   }, [])
 
-  const liveText = transcript + interimTranscript
+  const liveText = transcript && interimTranscript ? `${transcript} ${interimTranscript}` : (transcript || interimTranscript)
 
   return {
     supported,

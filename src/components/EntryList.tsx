@@ -14,7 +14,7 @@ export function EntryList({ entries, onDelete }: EntryListProps) {
       <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
         Past entries
       </h2>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-4">
         {entries.map((entry) => (
           <li key={entry.id}>
             <EntryItem entry={entry} onDelete={onDelete} />

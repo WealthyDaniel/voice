@@ -10,8 +10,8 @@
   --color-accent: #7c3aed;
   --color-accent-hover: #6d28d9;
   --color-accent-muted: rgba(124, 58, 237, 0.2);
-  --color-text: #e8e6f0;
-  --color-text-muted: #9b97ab;
+  --color-text: #f9fafb;
+  --color-text-muted: #9ca3af;
   --color-border: #2a2a40;
   --font-sans: "Inter", system-ui, sans-serif;
 }
