@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AppMode, JournalEntry } from './types'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { useDraftAutoSave } from './hooks/useDraftAutoSave'
@@ -56,8 +56,39 @@ function App() {
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date())
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
 
-  const speech = useSpeechRecognition()
+  const speechRef = useRef<any>(null)
+  const recorderRef = useRef<any>(null)
+
+  const handleTranscriptionComplete = useCallback((text: string) => {
+    const recorder = recorderRef.current
+    const speech = speechRef.current
+    if (!recorder || !speech) return
+
+    if (recorder.duration < 1) {
+      alert('Recording too short — try again')
+      speech.reset()
+      recorder.resetRecording()
+      return
+    }
+
+    const trimmed = text.trim()
+    if (trimmed) {
+      setEditText(trimmed)
+      setMode('editing')
+    } else {
+      alert('No voice input detected. Discarding empty entry.')
+      speech.reset()
+      recorder.resetRecording()
+    }
+  }, [])
+
+  const speech = useSpeechRecognition({
+    onEnd: handleTranscriptionComplete
+  })
+  speechRef.current = speech
+  
   const recorder = useAudioRecorder()
+  recorderRef.current = recorder
 
   // Load Initial Settings
   useEffect(() => {
@@ -95,26 +126,29 @@ function App() {
       speech.reset()
       recorder.resetRecording()
       setEditText('')
-      speech.start()
-      await recorder.startRecording()
+      
+      try {
+        // Request microphone permission first to ensure it's granted
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        // Stop temporary stream tracks
+        stream.getTracks().forEach((track) => track.stop())
+        
+        speech.start()
+        await recorder.startRecording()
+      } catch (err) {
+        console.error('Microphone permission denied:', err)
+        alert('Microphone permission is required to record journal entries.')
+      }
     }
   }, [speech, recorder])
 
   const handleDoneRecording = useCallback(() => {
-    speech.stop()
+    speech.stop(true) // Tell speech recognition to execute the onEnd callback
     recorder.stopRecording()
-    const text = speech.liveText.trim()
-    if (text) {
-      setEditText(text)
-      setMode('editing')
-    } else {
-      alert('No voice input detected. Discarding empty entry.')
-      speech.reset()
-      recorder.resetRecording()
-    }
   }, [speech, recorder])
 
   const handleCancelRecording = useCallback(() => {
+    speech.stop(false) // Just stop without triggering callback
     speech.reset()
     recorder.resetRecording()
   }, [speech, recorder])
@@ -615,7 +649,7 @@ function App() {
           )}
 
           {/* Fixed bottom navigation tabs bar */}
-          <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-bg/95 backdrop-blur-md px-4 py-2">
+          <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 border-t border-x border-border bg-bg/95 backdrop-blur-md px-4 py-2">
             <div className="mx-auto flex max-w-lg justify-around">
               {/* Journal Tab */}
               <button

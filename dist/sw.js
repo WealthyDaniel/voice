@@ -2,8 +2,8 @@ const CACHE_NAME = 'voice-journal-cache-v1'
 // PRECACHE_ASSETS_PLACEHOLDER
 const PRECACHE_ASSETS = [
   "/",
-  "/assets/index-B92dqq9x.css",
-  "/assets/index-ClpY3YvD.js",
+  "/assets/index-B2uC0jdJ.css",
+  "/assets/index-CWOZBO6D.js",
   "/favicon.svg",
   "/icon-192.png",
   "/icon-512.png",
