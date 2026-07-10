@@ -19,13 +19,6 @@ import { EntryList } from './components/EntryList'
 
 type TabType = 'journal' | 'record' | 'calendar' | 'profile'
 
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
-}
-
 function formatTimer(sec: number): string {
   const m = Math.floor(sec / 60).toString().padStart(2, '0')
   const s = (sec % 60).toString().padStart(2, '0')
@@ -287,7 +280,7 @@ function App() {
                   <img src="/logo.jpg" alt="Voice Journal Logo" className="h-12 w-12 rounded-xl object-cover border border-border shadow-lg" />
                   <div className="space-y-0.5">
                     <h1 className="text-xl font-bold tracking-tight text-text">
-                      {getGreeting()}, {userName}
+                      Hello, What are you journaling today?
                     </h1>
                     <p className="text-xs text-text-muted">Your thoughts. Your journal.</p>
                   </div>

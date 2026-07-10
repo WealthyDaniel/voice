@@ -1,9 +1,16 @@
 const CACHE_NAME = 'voice-journal-cache-v1'
+// PRECACHE_ASSETS_PLACEHOLDER
 const PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
-  '/logo.jpg',
-  '/manifest.json'
+  "/",
+  "/assets/index-B92dqq9x.css",
+  "/assets/index-ClpY3YvD.js",
+  "/favicon.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/icons.svg",
+  "/index.html",
+  "/logo.jpg",
+  "/manifest.json"
 ]
 
 // Install: pre-cache static assets
@@ -41,17 +48,23 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
-          })
-        }
-        return networkResponse
-      }).catch(() => {
-        // Offline: swallow error if we have cached resource
-      })
+      const fetchPromise = fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone()
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache)
+            })
+          }
+          return networkResponse
+        })
+        .catch((error) => {
+          // If offline and we have a cached response, return it and suppress console error.
+          if (cachedResponse) {
+            return cachedResponse
+          }
+          throw error
+        })
 
       return cachedResponse || fetchPromise
     })
