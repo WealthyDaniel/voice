@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { AppMode, JournalEntry } from './types'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { useDraftAutoSave } from './hooks/useDraftAutoSave'
@@ -56,39 +56,9 @@ function App() {
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date())
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
 
-  const speechRef = useRef<any>(null)
-  const recorderRef = useRef<any>(null)
 
-  const handleTranscriptionComplete = useCallback((text: string) => {
-    const recorder = recorderRef.current
-    const speech = speechRef.current
-    if (!recorder || !speech) return
-
-    if (recorder.duration < 1) {
-      alert('Recording too short — try again')
-      speech.reset()
-      recorder.resetRecording()
-      return
-    }
-
-    const trimmed = text.trim()
-    if (trimmed) {
-      setEditText(trimmed)
-      setMode('editing')
-    } else {
-      alert('No voice input detected. Discarding empty entry.')
-      speech.reset()
-      recorder.resetRecording()
-    }
-  }, [])
-
-  const speech = useSpeechRecognition({
-    onEnd: handleTranscriptionComplete
-  })
-  speechRef.current = speech
-  
+  const speech = useSpeechRecognition()
   const recorder = useAudioRecorder()
-  recorderRef.current = recorder
 
   // Load Initial Settings
   useEffect(() => {
@@ -126,27 +96,42 @@ function App() {
       speech.reset()
       recorder.resetRecording()
       setEditText('')
-      
-      try {
-        // Start the audio recorder first (which prompts for mic permission and gets the active stream)
-        await recorder.startRecording()
-        
-        // Once the audio recording stream is active and running, start Speech Recognition
-        speech.start()
-      } catch (err) {
-        console.error('Microphone permission denied or failed to start:', err)
-        alert('Microphone permission is required to record journal entries.')
-      }
+      // Start speech first (it already has its own mic instance from mount),
+      // then kick off the audio recorder
+      speech.start()
+      await recorder.startRecording()
     }
   }, [speech, recorder])
 
   const handleDoneRecording = useCallback(() => {
-    speech.stop(true) // Tell speech recognition to execute the onEnd callback
+    speech.stop()
     recorder.stopRecording()
+
+    // Wait briefly for the browser to finalize the last speech recognition result
+    // before reading the transcript. 250ms is enough for the final onresult event.
+    setTimeout(() => {
+      const duration = recorder.duration
+      if (duration < 1) {
+        alert('Recording too short — try again')
+        speech.reset()
+        recorder.resetRecording()
+        return
+      }
+
+      const text = speech.getFinalText()
+      if (text) {
+        setEditText(text)
+        setMode('editing')
+      } else {
+        alert('No voice input detected. Discarding empty entry.')
+        speech.reset()
+        recorder.resetRecording()
+      }
+    }, 250)
   }, [speech, recorder])
 
   const handleCancelRecording = useCallback(() => {
-    speech.stop(false) // Just stop without triggering callback
+    speech.stop()
     speech.reset()
     recorder.resetRecording()
   }, [speech, recorder])
